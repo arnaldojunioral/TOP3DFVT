@@ -7,7 +7,16 @@ This repository provides a **MATLAB/Octave implementation** of topology optimiza
 Supported material interpolation methods:
 - **SIMP** (Solid Isotropic Material with Penalization)  
 - **RAMP** (Rational Approximation of Material Properties)
-- or **GSS** (Grayscale Suppression - Voigt model)
+
+or
+ 
+- **GSS** (Grayscale Suppression - Voigt model) - strategy to penalize intermediate densities, effectively guiding the optimization toward crisp, manufacturable topologies.
+
+<p align="center">
+  <img width="285" height="268" alt="image" src="https://github.com/user-attachments/assets/f57dceaa-2773-4d08-992f-6858ca71c8fa" /><br>
+  <em>Metaphorical illustration of human evolution and topology optimization with Gray Scale Suppression (GSS)</em>
+</p>
+
 
 ----
 
@@ -15,6 +24,7 @@ Supported material interpolation methods:
 
 - 3D topology optimization of elastic structures.
 - It supports either a continuation scheme applied to penalization factors or a fixed penalization approach.
+- No filtering solutions.
 
 - Multiple **benchmark problems**:
   - Cantilever beam
