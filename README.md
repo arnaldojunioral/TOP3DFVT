@@ -68,7 +68,7 @@ The table below summarizes the key input parameters used in the simulation, incl
 | E             | Young's modulus (material stiffness)                 | MPa              |
 | nu            | Poisson's ratio                                      | –                |
 | P             | Applied load (negative indicates downward force)     | N                |
-| eta          | 1/3      | Filtering damping factor                                    |
+| eta          | 1/3      | Damping factor                                    |
 | tol          | 1e-3     | Convergence tolerance                                       |
 | maxit        | 1000     | Maximum number of iterations                                |
 | threshold    | 0.01     | Density threshold for display                               |
