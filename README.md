@@ -4,15 +4,17 @@
 
 This repository provides a **MATLAB/Octave implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**. The algorithm optimizes the material distribution in a discretized domain to achieve desired structural properties.
 
+Supported material interpolation methods:
+- **SIMP** (Solid Isotropic Material with Penalization)  
+- **RAMP** (Rational Approximation of Material Properties)
+- or **GSS** (Grayscale Suppression - Voigt model)
+
 ---
 
 ## ⚙️ Features
 
 - 3D topology optimization of elastic structures.
-- Supports different **interpolation models**:
-  - **SIMP** (Solid Isotropic Material with Penalization)
-  - **RAMP** (Rational Approximation of Material Properties)
-  - **GSS** (Grayscale Suppression - linear interpolation)
+- It supports either a continuation scheme applied to penalization factors or a fixed penalization approach.
 
 - Multiple **benchmark problems**:
   - Cantilever beam
@@ -21,7 +23,11 @@ This repository provides a **MATLAB/Octave implementation** of topology optimiza
 
 - Black-and-white fraction calculation and XY-plane symmetry check.
 - Live 3D visualization during optimization.
-- Output: optimized density matrix (`Density.mat`) and optimized design.
+- 3D optimized design.
+
+- ## ⚙️ Requirements
+
+The implementation is fully compatible with both **MATLAB (R2015 or later)** and **GNU Octave (version 6.4 or later)**. No additional toolboxes are required, ensuring that the code can be executed in a standard installation of either environment.
 
 ---
 
