@@ -2,14 +2,14 @@
 
 **Topology Optimization of 3D Elastic Structures employing the Finite-Volume Theory (FVT)**
 
-This repository provides a **MATLAB/Octave implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**. The algorithm optimizes the material distribution in a discretized domain to achieve desired structural properties.
+This repository provides a **MATLAB/Octave implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**. The algorithm optimizes the material distribution in a discretized domain to achieve a minimum structural compliance.
 
 Supported material interpolation methods:
 - **SIMP** (Solid Isotropic Material with Penalization)  
 - **RAMP** (Rational Approximation of Material Properties)
 - or **GSS** (Grayscale Suppression - Voigt model)
 
----
+----
 
 ## 📌 Features
 
@@ -21,13 +21,18 @@ Supported material interpolation methods:
   - MBB beam
   - Bridge
 
-- Live 3D visualization during optimization.
 - 3D optimized design.
 - Black-and-white fraction calculation and XY-plane symmetry check.
+
+----
 
 - ## ⚙️ Requirements
 
 The implementation is fully compatible with both **MATLAB (R2015 or later)** and **GNU Octave (version 6.4 or later)**. No additional toolboxes are required, ensuring that the code can be executed in a standard installation of either environment.
+
+----
+
+## 🚀 Getting started
 
 Save the [FVT3DELASTIC.m](https://raw.githubusercontent.com/arnaldojunioral/FVT3DELASTIC/main/FVT3DELASTIC.m) program (17 kB) and launch MATLAB in the same directory. The program can be executed with the following command:
 
