@@ -29,6 +29,33 @@ Supported material interpolation methods:
 
 The implementation is fully compatible with both **MATLAB (R2015 or later)** and **GNU Octave (version 6.4 or later)**. No additional toolboxes are required, ensuring that the code can be executed in a standard installation of either environment.
 
+Save the [FVT3DELASTIC.m](https://raw.githubusercontent.com/arnaldojunioral/FVT3DELASTIC/main/FVT3DELASTIC.m) program (17 kB) and launch MATLAB in the same directory. The program can be executed with the following command:
+
+**FVT3DELASTIC(n1, n2, n3)**
+
+where **n1**, **n2**, and **n3** define the number of subvolumes along the x<sub>1</sub>, x<sub>2</sub>, and x<sub>3</sub> directions, respectively. These parameters specify the discretization of the three-dimensional domain, as illustrated in the figure below.
+<!-- <p align="center">
+<img width="350" height="350" alt="image" src="https://github.com/user-attachments/assets/3d92838e-2fcb-40f7-b0da-80d891ec62d6" />
+</p> -->
+<p align="center">
+<img width="510" height="280" alt="image" src="https://github.com/user-attachments/assets/9efeaf36-5ae0-45d4-b3fc-7a83c7a8b952" />
+</p>
+
+The table below summarizes the key input parameters used in the simulation, including beam geometry, material properties, loading conditions, and visualization settings.
+
+#### Model Parameters
+
+| Parameter       | Description                                          | Unit             |
+|-----------------|------------------------------------------------------|------------------|
+| L             | Beam length                                          | mm               |
+| H             | Beam height                                          | mm               |
+| B             | Beam width                                           | mm               |
+| E             | Young's modulus (material stiffness)                 | MPa              |
+| nu            | Poisson's ratio                                      | –                |
+| P             | Applied load (negative indicates downward force)     | N                |
+| pb            | Problem: 'flexure', 'torsion', or 'torsion-flexure' | –          |
+| amp           | Amplification factor for deformation visualization   | –                | 
+
 ---
 
 ## 📌 User-Defined Parameters
