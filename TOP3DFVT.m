@@ -1,14 +1,11 @@
 % TOPOLOGY OPTIMIZATION OF 3D ELASTIC STRUCTURES BY ZEROTH ORDER
 % FINITE-VOLUME THEORY
 
-function Top3DFVT(nx, ny, nz, volfrac, varargin)
+function Top3DFVT(n1, n2, n3, volfrac, model)
 %% ____________________________________________________________USER-DEFINED
 [L, H, B] = deal(120, 40, 20);                                             % Beam dimensions
 [E0, Emin, nu]  = deal(1, 1e-9, 0.3);                                      % Material properties
 P  = -1;                                                                   % Applied load
-
-% Choose penalization model: 'SIMP', 'RAMP', or 'GSS'
-model = 'GSS';                                                             % Set to 'GSS' for grayscale suppression (linear interpolation)
 eta = 1/3;                                                                 % Filtering damping factor
 tol = 1e-3;                                                                % Convergence tolerance
 maxit = 1000;                                                              % Maximum number of iterations
@@ -20,24 +17,13 @@ pb = 'Cantilever';                                                         % Pro
 
 % Interpret optional inputs depending on model
 if any(strcmpi(model, {'SIMP', 'RAMP'}))
-    
+    penal = 3;
+    % Optional: gradual continuation
+    % penal = 1:3; 
     grayscale = false;
-    if length(varargin) < 1
-        error('SIMP and RAMP models require: penal and frad, ft. (filter)');
-
-    elseif length(varargin) == 1 % no-filtering
-        penal = varargin{1};
-
-    elseif length(varargin) == 3 % analysis with filtering
-        [penal, frad, ft] = deal(varargin{1:3});
-    end
-
 elseif strcmpi(model, 'GSS')
+    penal = 1;                                                             % dummy value just to enter the loop once
     grayscale = true;
-    if ~isempty(varargin)
-        error('GSS model not require: penal and frad, ft. (filter)');
-    end
-
 else
     error('Unknown material model: %s', model);
 end
@@ -55,19 +41,18 @@ switch upper(model)
 
     case 'GSS'   % Grayscale suppression – linear interpolation (Voigt model)
         MatInt = @(~, x) {Emin + (E0 - Emin)*x, (E0 - Emin) * ones(size(x))};
-        penal = 1; % dummy value just to enter the loop once
 
     otherwise
-        error('Unknown material model: %s. Choose SIMP, RAMP, or GSS.', model);
+        error('Unknown material penalization: %s. Choose SIMP, RAMP, or GSS.', model);
 end
 
 %% ________________________________________________________DESIGN VARIABLES
 
 % subvolume dimensions
-[l, h, b] = deal(L/nx, H/ny, B/nz);
+[l, h, b] = deal(L/n1, H/n2, B/n3);
 
 % Initialize uniform material density
-x = volfrac * ones(nx, ny, nz);
+x = volfrac * ones(n1, n2, n3);
 
 % Define active design region depending on the problem type
 switch pb
@@ -77,7 +62,7 @@ switch pb
         x(:, end-4:end, :) = 1;
 
         % Create logical mask for active design variables
-        mask = true(nx, ny, nz);
+        mask = true(n1, n2, n3);
         mask(:, end-4:end, :) = false;
 
         % Extract active indices for optimization
@@ -92,39 +77,39 @@ switch pb
 end
 
 % Volume constraint gradient
-dvdx = repmat(l * h * b, [nx, ny, nz]);
+dvdx = repmat(l * h * b, [n1, n2, n3]);
 
 %% ___________________________________PREPARE FINITE-VOLUME THEORY ANALYSIS
 
-[dof, ndof, iK, jK] = DOFassembly(nx, ny, nz);                             % degrees of freedom
+[dof, ndof, iK, jK] = DOFassembly(n1, n2, n3);                             % degrees of freedom
 K0 = LocalStiffMatrix(E0, nu, l, h, b);                                    % local stiffness matrix
 
 % BOUNDARY CONDITIONS: global force and fixed dofs (support)
 switch pb
 
     case 'Cantilever'
-        F = sparse(dof(nx:nx * ny:end, 5)', 1,  P, ndof, 1);
-        supp = unique(dof(1:nx:end, 1:3));
+        F = sparse(dof(n1:n1 * n2:end, 5)', 1,  P, ndof, 1);
+        supp = unique(dof(1:n1:end, 1:3));
 
     case 'MBB'
-        F    = sparse(dof(nx * (ny - 1) + 1:nx * ny:end, 11)', 1,  P, ndof, 1);
-        supp = unique([unique(dof(1:nx:end, [1,3])); dof(nx:nx * ny:end, 8)]);
-        % supp = unique([unique(dof(1:nx:end, [1,3])); dof(nx:nx * ny * (nz-1):end, 8)]);
+        F    = sparse(dof(n1 * (n2 - 1) + 1:n1 * n2:end, 11)', 1,  P, ndof, 1);
+        supp = unique([unique(dof(1:n1:end, [1,3])); dof(n1:n1 * n2:end, 8)]);
+        % supp = unique([unique(dof(1:n1:end, [1,3])); dof(n1:n1 * n2 * (n3-1):end, 8)]);
 
     case 'Bridge'
-        % Map subvolumes on the top layer (j = ny)
-        [i, k] = ndgrid(1:nx, 1:nz);
-        subvol = i + (ny - 1) * nx + (k - 1) * nx * ny;
+        % Map subvolumes on the top layer (j = n2)
+        [i, k] = ndgrid(1:n1, 1:n3);
+        subvol = i + (n2 - 1) * n1 + (k - 1) * n1 * n2;
 
         % Load vector (column 11 of the 'dof' matrix)
         F = sparse(dof(subvol(:), 11)', 1,  P, ndof, 1);
 
         % Select base element indices along x (i) for supports at j = 1
-        id = ceil(nx / 4);
-        base_ids = [id, nx - id + 1];
+        id = ceil(n1 / 4);
+        base_ids = [id, n1 - id + 1];
 
         % Propagate base elements along the z-direction (k)
-        layer = (0:nz-1)' * nx * ny;
+        layer = (0:n3-1)' * n1 * n2;
         subvol = base_ids + layer;
 
         % Fixed DOFs (columns 7 to 9 of 'dof' matrix)
@@ -135,26 +120,11 @@ end
 fdof = setdiff(dof(:), supp(:));                                           % free degrees of freedom
 StiffnessAssemblage = @(sK) sparse(iK(:), jK(:), sK(:), ndof, ndof);       % global stiffness matrix
 
-%% ______________FILTERS TO MODIFY THE SUBVOLUME SENSITIVITIES OR DENSITIES
-if any(strcmpi(model, {'SIMP', 'RAMP'})) && nargin == 7
-    [H, Hs] = BuildFilter(nx, ny, nz, l, h, b, frad);
-    if ft == 1
-        sensitivity = @(x,dfdx,dvdx){H * (x(:).*dfdx(:))./Hs./max(1e-3,x(:)),dvdx};
-        density = @(x) x;
-    elseif ft == 2
-        sensitivity = @(x, dfdx, dvdx){(H * dfdx(:)./Hs), H * (dvdx(:)./Hs)};
-        density = @(x) (H * x(:)) ./ Hs;
-    end
-else
-    sensitivity = @(x, dfdx, dvdx){dfdx, dvdx};
-    density = @(x) x;
-end
-
 %% ____________________________________________________OPTIMIZATION PROCESS
 t_start = tic;
 for i = 1:length(penal(:))
 
-    [change, loop, qmax, q, xPhys] = deal(1.0, 0, 1/eta, 1.0, x);
+    [change, loop, qmax, q] = deal(1.0, 0, 1/eta, 1.0);
     fprintf('\nPenalty factor: %1.2f\n', penal(i));                        % print current penalty factor
 
     while (change > tol && loop < maxit), loop = loop+1;                   % start optmization process
@@ -163,21 +133,16 @@ for i = 1:length(penal(:))
         q = 1 + grayscale * (loop >= 20) * (min(qmax, 1.02 * q) - 1);
 
         % FINITE-VOLUME THEORY ANALYSIS
-        Mat = MatInt(penal(i), xPhys);                                     % material interpolation
+        Mat = MatInt(penal(i), x);                                         % material interpolation
         E = Mat{1}; dEdx = Mat{2};
         sK = K0(:) * E(:)';                                                % stiffness interpolation
-        K = StiffnessAssemblage(sK); %K = (K+K')/2;                         % assemblage of the stiffness matrix
+        K = StiffnessAssemblage(sK); K = (K+K')/2;                         % assemblage of the stiffness matrix
         U = Tikhonov(fdof, K, F);                                          % compute global displacements employing Tikhonov strategy
 
         % COMPLIANCE AND SENSITIVITY
-        fe = reshape(sum((U(dof) * K0) .* U(dof), 2),[nx, ny, nz]);        %
+        fe = reshape(sum((U(dof) * K0) .* U(dof), 2),[n1, n2, n3]);        %
         f  = sum(sum(sum(E .* fe)));                                       % objective function: structural compliance
         dfdx = -dEdx .* fe;                                                % sensitivity
-
-        % MODIFICATION OF THE SENSITIVITIES
-        sens = sensitivity(x, dfdx, dvdx);
-        dfdx(:) = sens{1};
-        dvdx(:) = sens{2};
 
         % UPDATE OF DESIGN VARIABLES AND PHYSICAL DENSITIES
         l1 = 0; l2 = 1e9; move = 0.2;
@@ -186,8 +151,7 @@ for i = 1:length(penal(:))
             beta = (-dfdx ./ dvdx / lmid).^eta;
             xnew = x;
             xnew(active) = max(0, max(x(active)-move, min(1, min(x(active)+move, (x(active).*beta(active)).^q))));
-            xPhys(active) = density(xnew(active));
-            if mean(xPhys(:)) > volfrac
+            if mean(xnew(:)) > volfrac
                 l1 = lmid;
             else
                 l2 = lmid;
@@ -200,66 +164,66 @@ for i = 1:length(penal(:))
 
         % PRINT RESULTS
         fprintf('It: %i\tObjec.: %1.2f\tVol.: %1.2f\tGSS: %1.2f\tChange: %1.3f\n',...
-            loop, f, mean(xPhys(:)), q, change);
+            loop, f, mean(xnew(:)), q, change);
 
         % PLOT DENSITIES
-        if displayflag, clf; display3D(xPhys, l, h, b, threshold);
-            saveTopologyGIF('topology.gif', 0);
+        if displayflag, clf; display3D(xnew, l, h, b, threshold);
+            % saveTopologyGIF('topology.gif', 0);
         end
 
         % VOLUME CONTROLLER
-        if abs(mean(xPhys(:)) - volfrac) > 0.001
+        if abs(mean(xnew(:)) - volfrac) > 0.001
             warning('Volume constraint deviated: current = %.4f, target = %.4f', ...
-                mean(xPhys(:)), volfrac);
+                mean(xnew(:)), volfrac);
             return;
         end
     end
 end
 
 % BLACK-AND-WHITE FRACTION
-bw = nnz(xPhys < 0.001+1e-6 | xPhys > 1.0-1e-6) / numel(xPhys);
+bw = nnz(xnew < 0.001+1e-6 | xnew > 1.0-1e-6) / numel(xnew);
 fprintf('B&W: %1.3f\n', bw);
 
 % CHECK SYMMETRY ACROSS XY-PLANE
-symmetry_error = max(abs(xPhys - flip(xPhys, 3)), [], 'all');
+symmetry_error = max(abs(xnew - flip(xnew, 3)), [], 'all');
 is_symmetric_xy = symmetry_error < 1e-3;
 fprintf('Symmetry across xy-plane: %s\n', string(is_symmetric_xy));
 
 % PLOT DESIGN
-if ~displayflag, clf; display3D(xPhys, l, h, b, threshold); end
+if ~displayflag, clf; display3D(xnew, l, h, b, threshold); end
 
 % SAVE DENSITY MATRIX
-save('Density.mat', 'xPhys');
+save('Density.mat', 'xnew');
 
 % PROCESSING TIME
 t_total = toc(t_start);
 fprintf('Total processing time: %0.2f seconds \n', t_total);
 
 %% _____________________________________________ORDENING DEGREES OF FREEDOM
-function [dof, ndof, iK, jK] = DOFassembly(nx, ny, nz)
+function [dof, ndof, iK, jK] = DOFassembly(n1, n2, n3)
 
 % Indices for subvolumes:
-[i, j, k] = ndgrid(1:nx, 1:ny, 1:nz);
+[i, j, k] = ndgrid(1:n1, 1:n2, 1:n3);
 
 % Number of horizontal local_faces:
-Nhf = nx * nz * (ny + 1);
+Nhf = n1 * n3 * (n2 + 1);
 
 % Number of vertical local_faces in the x-direction:
-Nvfx = (nx + 1) * nz * ny;
+Nvfx = (n1 + 1) * n3 * n2;
 
 % Subvolume local_faces:
-fc1 = Nhf + i(:) + (k(:) - 1) * (nx + 1) + (j(:) - 1) * nz * (nx + 1);     % Left lateral local_faces
-fc2 = Nhf + i(:) + 1 + (k(:) - 1) * (nx + 1) + (j(:) - 1) * nz * (nx + 1); % Right lateral local_faces
-fc3 = i(:) + (k(:) - 1) * nx + (j(:) - 1) * nx * nz;                       % Bottom local_faces
-fc4 = i(:) + (k(:) - 1) * nx + j(:) * nx * nz;                             % Top local_faces
-fc5 = Nhf + Nvfx + i(:) + (k(:) - 1) * nx + (j(:) - 1) * nx * (nz + 1);    % Back local_faces
-fc6 = Nhf + Nvfx + i(:) + k(:) * nx + (j(:) - 1) * nx * (nz + 1);          % Front local_faces
+fc1 = Nhf + i(:) + (k(:) - 1) * (n1 + 1) + (j(:) - 1) * n3 * (n1 + 1);     % Left lateral local_faces
+fc2 = Nhf + i(:) + 1 + (k(:) - 1) * (n1 + 1) + (j(:) - 1) * n3 * (n1 + 1); % Right lateral local_faces
+fc3 = i(:) + (k(:) - 1) * n1 + (j(:) - 1) * n1 * n3;                       % Bottom local_faces
+fc4 = i(:) + (k(:) - 1) * n1 + j(:) * n1 * n3;                             % Top local_faces
+fc5 = Nhf + Nvfx + i(:) + (k(:) - 1) * n1 + (j(:) - 1) * n1 * (n3 + 1);    % Back local_faces
+fc6 = Nhf + Nvfx + i(:) + k(:) * n1 + (j(:) - 1) * n1 * (n3 + 1);          % Front local_faces
 
 % Final combination of local_faces:
 local_faces = [fc1, fc2, fc3, fc4, fc5, fc6];
 
 % Degrees of fereedom
-dof = zeros(nx * ny * nz, 18);
+dof = zeros(n1 * n2 * n3, 18);
 dof(:, 1:3:16) = 3 * local_faces - 2;
 dof(:, 2:3:17) = 3 * local_faces - 1;
 dof(:, 3:3:18) = 3 * local_faces;
@@ -431,7 +395,7 @@ x(active) = x(active) * target_active_sum / sum(x(active));
 function display3D(rho, l, h, b, threshold)
 
 % Mesh discretization
-[nx, ny, nz] = size(rho); nsv = nx * ny * nz;
+[n1, n2, n3] = size(rho); nsv = n1 * n2 * n3;
 
 % Predefined local faces
 local_faces = [1 4 3 2; 1 2 6 5; 2 3 7 6; 3 4 8 7; 1 5 8 4; 5 6 7 8];
@@ -448,9 +412,9 @@ vz = [0, 0, 0, 0, 1, 1, 1, 1];
 
 % Loop over all voxels
 idV = 0; idF = 0;
-for k = 1:nz
-    for j = 1:ny
-        for i = 1:nx
+for k = 1:n3
+    for j = 1:n2
+        for i = 1:n1
 
             % Check if the density of the subvolume is greater than the threshold
             if (rho(i, j, k) > threshold)
@@ -493,18 +457,16 @@ axis equal; axis tight; axis off; box on;
 view([30, 20]);
 set(gcf, 'Color', 'w');
 %
-% Lighting setup
-% camlight; lighting gouraud;
-%
+
 % Configure figure window
 fig = figure(1);
-% scrsz = get(0, 'ScreenSize');
-% figWidth  = 0.4 * scrsz(3);
-% figHeight = 0.6 * scrsz(4);
-% figLeft   = (scrsz(3) - figWidth) / 2;
-% figBottom = (scrsz(4) - figHeight) / 2;
-% set(fig, 'Name', 'Top3DFVT', 'NumberTitle', 'off', ...
-%     'OuterPosition', [figLeft, figBottom, figWidth, figHeight]);
+scrsz = get(0, 'ScreenSize');
+figWidth  = 0.4 * scrsz(3);
+figHeight = 0.6 * scrsz(4);
+figLeft   = (scrsz(3) - figWidth) / 2;
+figBottom = (scrsz(4) - figHeight) / 2;
+set(fig, 'Name', 'Top3DFVT', 'NumberTitle', 'off', ...
+    'OuterPosition', [figLeft, figBottom, figWidth, figHeight]);
 set(fig, 'Name', 'Top3DFVT', 'NumberTitle', 'off');
 
 %% _____________________________________________________________________END
