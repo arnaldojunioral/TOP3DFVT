@@ -83,7 +83,7 @@ In the following example, the model consists of a structured mesh discretized in
 The GSS strategy was employed.
 
 <p align="center">
-<img width="550" height="373" alt="image" src="https://github.com/user-attachments/assets/3286338d-7d7f-4e84-8526-e4e316ec63df" />
+<img width="500" height="280" alt="image" src="https://github.com/user-attachments/assets/3286338d-7d7f-4e84-8526-e4e316ec63df" />
 </p>
 
 Run the main function:
