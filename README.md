@@ -2,8 +2,7 @@
 
 **Topology Optimization of 3D Elastic Structures employing the Finite-Volume Theory (FVT)**
 
-This repository provides a **MATLAB/Octave implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**.  
-The algorithm optimizes the material distribution in a discretized domain to achieve desired structural properties.
+This repository provides a **MATLAB/Octave implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**. The algorithm optimizes the material distribution in a discretized domain to achieve desired structural properties.
 
 ---
 
