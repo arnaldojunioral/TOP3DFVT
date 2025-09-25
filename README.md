@@ -2,7 +2,7 @@
 
 **Topology Optimization of 3D Elastic Structures employing the Finite-Volume Theory (FVT)**
 
-This repository provides a **MATLAB/Octave implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**. The algorithm optimizes the material distribution in a discretized domain to achieve a minimum structural compliance.
+This repository provides a **MATLAB implementation** of topology optimization for 3D continuum elastic structures employing the **Finite-Volume Theory (FVT)**. The algorithm optimizes the material distribution in a discretized domain to achieve a minimum structural compliance.
 
 Supported material interpolation methods:
 - **SIMP** (Solid Isotropic Material with Penalization)  
