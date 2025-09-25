@@ -1,4 +1,4 @@
-# Top3DFVT
+# ✨ Top3DFVT
 
 **Topology Optimization of 3D Elastic Structures employing the Finite-Volume Theory (FVT)**
 
@@ -11,7 +11,7 @@ Supported material interpolation methods:
 
 ---
 
-## ⚙️ Features
+## 📌 Features
 
 - 3D topology optimization of elastic structures.
 - It supports either a continuation scheme applied to penalization factors or a fixed penalization approach.
@@ -21,9 +21,9 @@ Supported material interpolation methods:
   - MBB beam
   - Bridge
 
-- Black-and-white fraction calculation and XY-plane symmetry check.
 - Live 3D visualization during optimization.
 - 3D optimized design.
+- Black-and-white fraction calculation and XY-plane symmetry check.
 
 - ## ⚙️ Requirements
 
