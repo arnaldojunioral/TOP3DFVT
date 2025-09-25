@@ -17,7 +17,6 @@ or
   <em>Metaphorical illustration of human evolution and topology optimization with Gray Scale Suppression (GSS)</em>
 </p>
 
-
 ----
 
 ## 📌 Features
