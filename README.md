@@ -43,11 +43,12 @@ The implementation is fully compatible with both **MATLAB (R2015 or later)** and
 
 ## 🚀 Getting started
 
-Save the [FVT3DELASTIC.m](https://raw.githubusercontent.com/arnaldojunioral/FVT3DELASTIC/main/FVT3DELASTIC.m) program (17 kB) and launch MATLAB in the same directory. The program can be executed with the following command:
+Save the [TOP3DFVT.m](https://raw.githubusercontent.com/arnaldojunioral/TOP3DFVT/main/TOP3DFVT.m) program (16.7 kB) and launch MATLAB in the same directory. The program can be executed with the following command:
 
-**FVT3DELASTIC(n1, n2, n3)**
+**Top3DFVT(n1, n2, n3, volfrac, model)**
 
-where **n1**, **n2**, and **n3** define the number of subvolumes along the x<sub>1</sub>, x<sub>2</sub>, and x<sub>3</sub> directions, respectively. These parameters specify the discretization of the three-dimensional domain, as illustrated in the figure below.
+where **n1**, **n2**, and **n3** define the number of subvolumes along the x<sub>1</sub>, x<sub>2</sub>, and x<sub>3</sub> directions, respectively. These parameters specify the discretization of the three-dimensional domain, as illustrated in the figure below. **volfrac** is the volume fraction constraint of solid material, and **model** defines the penalization strategy: **SIMP**, **RAMP**, or **GSS**.
+
 <!-- <p align="center">
 <img width="350" height="350" alt="image" src="https://github.com/user-attachments/assets/3d92838e-2fcb-40f7-b0da-80d891ec62d6" />
 </p> -->
@@ -67,22 +68,32 @@ The table below summarizes the key input parameters used in the simulation, incl
 | E             | Young's modulus (material stiffness)                 | MPa              |
 | nu            | Poisson's ratio                                      | –                |
 | P             | Applied load (negative indicates downward force)     | N                |
-| pb            | Problem: 'flexure', 'torsion', or 'torsion-flexure' | –          |
-| amp           | Amplification factor for deformation visualization   | –                | 
+| eta          | 1/3      | Filtering damping factor                                    |
+| tol          | 1e-3     | Convergence tolerance                                       |
+| maxit        | 1000     | Maximum number of iterations                                |
+| threshold    | 0.01     | Density threshold for display                               |
+| displayflag  | true     | Display during optimization (true = live updates)         |
+| pb           | Cantilever | Problem type                                              |
 
----
+----
 
-## 📌 User-Defined Parameters
+## 📌 Example
+
+In the following example, the model consists of a structured mesh discretized into 30 × 10 × 3  subvolumes, with a solid material volume fraction constrained to 50%.
+The GSS strategy was employed.
+
+<p align="center">
+<img width="550" height="373" alt="image" src="https://github.com/user-attachments/assets/3286338d-7d7f-4e84-8526-e4e316ec63df" />
+</p>
+
+Run the main function:
 
 ```matlab
-nx = 120;      % number of subvolumes in x-direction
-ny = 40;       % number of subvolumes in y-direction
-nz = 20;       % number of subvolumes in z-direction
-volfrac = 0.5; % target solid material volume fraction
 
-model = 'GSS'; % 'SIMP', 'RAMP', or 'GSS'
-pb = 'Cantilever'; % Problem type: 'Cantilever', 'MBB', 'Bridge'
+Top3DFVT(30, 10, 0.5, 'GSS');  
 
+[L, H, B] = deal(120, 40, 20);   % Beam dimensions
+pb = 'Cantilever'; 
 E0 = 1;        % Young's modulus of solid material
 Emin = 1e-9;   % Young's modulus of void (numerical stability)
 nu = 0.3;      % Poisson ratio
@@ -92,3 +103,17 @@ tol = 1e-3;    % Convergence tolerance
 maxit = 1000;  % Maximum iterations
 threshold = 0.01; % Density threshold for display
 displayflag = true; % Live plot flag
+
+````
+
+----
+
+## 🎥 Topology evolution
+
+<p align="center">
+  <img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/16f8fb84-74f8-44b9-b356-09a90b7796d1" /><br>
+  B&W: 0.999<br>
+  Symmetry across xy-plane: true
+</p>
+
+----
