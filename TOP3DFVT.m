@@ -15,14 +15,14 @@ pb = 'Cantilever';                                                         % Pro
 
 %% ________________________________________________________________________
 
-% Interpret optional inputs depending on model
+% Interpret optional inputs depending on the model
 if any(strcmpi(model, {'SIMP', 'RAMP'}))
     penal = 3;
     % Optional: gradual continuation
-    % penal = 1:3; 
+    % penal = 1:3;
     grayscale = false;
 elseif strcmpi(model, 'GSS')
-    penal = 1;                                                             % dummy value just to enter the loop once
+    penal = 1;                                                             % dummy value to enter the loop once
     grayscale = true;
 else
     error('Unknown material model: %s', model);
@@ -30,7 +30,7 @@ end
 
 %% _____________________________________ INTERPOLATION / PENALIZATION MODEL
 switch upper(model)
-    
+
     case 'SIMP'  % Solid Isotropic Material with Penalization
         MatInt = @(p, x) {Emin + (E0-Emin) * x.^p, ...
             p * (E0-Emin) * x.^(p-1)};
@@ -56,7 +56,7 @@ x = volfrac * ones(n1, n2, n3);
 
 % Define active design region depending on the problem type
 switch pb
-    
+
     case 'Bridge'
         % Fix solid subvolumes at the far end of y-direction
         x(:, end-4:end, :) = 1;
@@ -168,7 +168,6 @@ for i = 1:length(penal(:))
 
         % PLOT DENSITIES
         if displayflag, clf; display3D(xnew, l, h, b, threshold);
-            % saveTopologyGIF('topology.gif', 0);
         end
 
         % VOLUME CONTROLLER
@@ -185,9 +184,14 @@ bw = nnz(xnew < 0.001+1e-6 | xnew > 1.0-1e-6) / numel(xnew);
 fprintf('B&W: %1.3f\n', bw);
 
 % CHECK SYMMETRY ACROSS XY-PLANE
-symmetry_error = max(abs(xnew - flip(xnew, 3)), [], 'all');
+symmetry_error = max(max(max(abs(xnew - flip(xnew, 3)))));
 is_symmetric_xy = symmetry_error < 1e-3;
-fprintf('Symmetry across xy-plane: %s\n', string(is_symmetric_xy));
+
+if is_symmetric_xy
+    fprintf('Symmetry across xy-plane: true\n');
+else
+    fprintf('Symmetry across xy-plane: false\n');
+end
 
 % PLOT DESIGN
 if ~displayflag, clf; display3D(xnew, l, h, b, threshold); end
@@ -456,17 +460,9 @@ patch('Faces', Faces, 'Vertices', Vertices, 'FaceVertexCData', colors, ...
 axis equal; axis tight; axis off; box on;
 view([30, 20]);
 set(gcf, 'Color', 'w');
-%
 
 % Configure figure window
 fig = figure(1);
-scrsz = get(0, 'ScreenSize');
-figWidth  = 0.4 * scrsz(3);
-figHeight = 0.6 * scrsz(4);
-figLeft   = (scrsz(3) - figWidth) / 2;
-figBottom = (scrsz(4) - figHeight) / 2;
-set(fig, 'Name', 'Top3DFVT', 'NumberTitle', 'off', ...
-    'OuterPosition', [figLeft, figBottom, figWidth, figHeight]);
 set(fig, 'Name', 'Top3DFVT', 'NumberTitle', 'off');
 
 %% _____________________________________________________________________END
