@@ -10,7 +10,7 @@ Supported material interpolation methods:
 
 or
  
-- **GSS** (Grayscale Suppression - Voigt model) - strategy to penalize intermediate densities, effectively guiding the optimization toward crisp, manufacturable topologies.
+- **GSS** (Gray Scale Suppression - Voigt model) - strategy to penalize intermediate densities, effectively guiding the optimization toward crisp, manufacturable topologies.
 
 <p align="center">
   <img width="285" height="268" alt="image" src="https://github.com/user-attachments/assets/f57dceaa-2773-4d08-992f-6858ca71c8fa" /><br>
@@ -111,9 +111,13 @@ displayflag = true; % Live plot flag
 ## 🎥 Topology evolution
 
 <p align="center">
+<b> Gray Scale Suppression<b> </b>
+</p>
+ 
+<p align="center">
   <img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/16f8fb84-74f8-44b9-b356-09a90b7796d1" /><br>
   B&W: 0.999<br>
-  Symmetry across xy-plane: true
+  Symmetry across x<sub>1</sub>x<sub>2</sub>-plane: true
 </p>
 
 ----
