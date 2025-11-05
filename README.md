@@ -49,16 +49,13 @@ Save the [TOP3DFVT.m](https://raw.githubusercontent.com/arnaldojunioral/TOP3DFVT
 
 where **n1**, **n2**, and **n3** define the number of subvolumes along the x<sub>1</sub>, x<sub>2</sub>, and x<sub>3</sub> directions, respectively. These parameters specify the discretization of the three-dimensional domain, as illustrated in the figure below. **volfrac** is the volume fraction constraint of solid material, and **model** defines the penalization strategy: **SIMP**, **RAMP**, or **GSS**.
 
-<!-- <p align="center">
-<img width="350" height="350" alt="image" src="https://github.com/user-attachments/assets/3d92838e-2fcb-40f7-b0da-80d891ec62d6" />
-</p> -->
 <p align="center">
-<img width="510" height="280" alt="image" src="https://github.com/user-attachments/assets/9efeaf36-5ae0-45d4-b3fc-7a83c7a8b952" />
+<img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/9efeaf36-5ae0-45d4-b3fc-7a83c7a8b952" />
 </p>
 
-<p align="center">
+<!-- <p align="center">
 <img width="900" height="900" alt="image" src="https://github.com/user-attachments/assets/31d9b6c7-5f0c-4510-8922-3ec40cd9b9ea" />
-</p>
+</p> -->
 
 The table below summarizes the key input parameters used in the simulation, including beam geometry, material properties, loading conditions, and visualization settings.
 
