@@ -15,14 +15,14 @@ pb = 'Cantilever';                                                         % Pro
 
 %% ________________________________________________________________________
 
-% Interpret optional inputs depending on the model
+% Interpret optional inputs depending on model
 if any(strcmpi(model, {'SIMP', 'RAMP'}))
     penal = 3;
     % Optional: gradual continuation
     % penal = 1:3;
     grayscale = false;
 elseif strcmpi(model, 'GSS')
-    penal = 1;                                                             % dummy value to enter the loop once
+    penal = 1;                                                             % dummy value just to enter the loop once
     grayscale = true;
 else
     error('Unknown material model: %s', model);
@@ -209,22 +209,19 @@ function [dof, ndof, iK, jK] = DOFassembly(n1, n2, n3)
 % Indices for subvolumes:
 [i, j, k] = ndgrid(1:n1, 1:n2, 1:n3);
 
-% Number of horizontal local_faces:
-Nhf = n1 * n3 * (n2 + 1);
+% Number of faces by family
+Nvfx = (n1 + 1) * n2 * n3;                                                 % left/right
 
-% Number of vertical local_faces in the x-direction:
-Nvfx = (n1 + 1) * n3 * n2;
-
-% Subvolume local_faces:
-fc1 = Nhf + i(:) + (k(:) - 1) * (n1 + 1) + (j(:) - 1) * n3 * (n1 + 1);     % Left lateral local_faces
-fc2 = Nhf + i(:) + 1 + (k(:) - 1) * (n1 + 1) + (j(:) - 1) * n3 * (n1 + 1); % Right lateral local_faces
-fc3 = i(:) + (k(:) - 1) * n1 + (j(:) - 1) * n1 * n3;                       % Bottom local_faces
-fc4 = i(:) + (k(:) - 1) * n1 + j(:) * n1 * n3;                             % Top local_faces
-fc5 = Nhf + Nvfx + i(:) + (k(:) - 1) * n1 + (j(:) - 1) * n1 * (n3 + 1);    % Back local_faces
-fc6 = Nhf + Nvfx + i(:) + k(:) * n1 + (j(:) - 1) * n1 * (n3 + 1);          % Front local_faces
+% Subvolume local faces:
+fc1 = (j(:)-1) * (n3*(n1+1)) + (k(:)-1) * (n1+1) + i(:);                   % left faces
+fc2 = fc1 + 1;                                                             % right faces
+fc3 = Nvfx + (j(:)-1) * (n1*n3) + (k(:)-1) * n1 + i(:);                    % bottom faces
+fc4 = fc3 + (n1*n3);                                                       % top faces
+fc5 = Nvfx + (n1*n3*(n2+1)) + (k(:)-1) * (n1*n2) + (j(:)-1)*n1 + i(:);     % back faces
+fc6 = fc5 + (n1*n2);                                                       % front faces
 
 % Final combination of local_faces:
-local_faces = [fc1, fc2, fc3, fc4, fc5, fc6];
+local_faces = [fc1 fc2 fc3 fc4 fc5 fc6];
 
 % Degrees of fereedom
 dof = zeros(n1 * n2 * n3, 18);
@@ -360,7 +357,7 @@ lambda0 = 10.^(-12);
 lambda = lambda0 .* trace(K) / ndof;
 
 % Initialize variables
-U = zeros(ndof, 1); Unew = U;
+Unew = zeros(ndof, 1);
 error = 1; iter = 1;
 
 while error > tol
@@ -373,9 +370,6 @@ while error > tol
 
     % Compute the relative error
     error = norm(K(fdof, fdof) * Unew(fdof) - F(fdof)) / norm(F(fdof));
-
-    % Update the displacement vector
-    U(fdof) = Unew(fdof);
 
     % iteration
     iter = iter + 1;
