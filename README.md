@@ -1,4 +1,4 @@
-# ✨ Top3DFVT
+# ✨ TOP3DFVT
 
 **Topology Optimization of 3D Elastic Structures employing the Finite-Volume Theory (FVT)**
 
